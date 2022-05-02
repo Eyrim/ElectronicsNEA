@@ -4,17 +4,15 @@ setfreq m32
 
 init:
 	gosub configureADC
-	gosub configureMaths
 	gosub main
 	
 configureADC:
 	adcconfig %000
 	return
-	
-configureMaths:
-	;symbol PI = 
 
 main:
+	gosub setupInterrupt
+	end
 	;gosub setSineSymbols
 	;gosub generateSineWave
 	
@@ -50,8 +48,8 @@ setSawtoothSymbols:
 	
 	symbol NUMBER_OF_WAVES = b8
 	let NUMBER_OF_WAVES = 5
-}
-generateSawtoothWaveRefac:
+
+generateSawtoothWave:
 	do
 		{
 		do
@@ -69,7 +67,7 @@ generateSawtoothWaveRefac:
 		let X_VALUE_DEF = 0
 		let Y_VALUE_DEF = 0
 	loop until NUMBER_OF_WAVES =  LOOP_INDEX
-
+}
 ;===============================================;
 ; 			Subroutines to 			;
 ; 			Light up various 			;
@@ -88,3 +86,61 @@ lightUpHighTom:
 lightUpFloorTom:
 	return;
 }
+
+end
+
+;===============================================;
+; 			Subroutines to 			;
+;			Handle Interrupts			;
+;===============================================;
+{
+interrupt:
+	if input0 = %1 then
+		gosub generateSawtoothWave
+	endif
+
+	if input4 = %1 then
+		gosub lightUpBass
+		
+	endif
+	
+	if input5 = %1 then
+		gosub lightUpSnare
+		
+	endif
+
+	if input6 = %1 then
+		gosub lightUpHighTom
+		
+	endif
+
+	if input7 = %1 then
+		gosub lightUpFloorTom
+	endif
+
+	gosub setupInterrupt ; Re-enable the interrupt
+	return
+	
+setupInterrupt:
+	setint and %11110001, %11110000
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
