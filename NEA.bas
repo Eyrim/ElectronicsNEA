@@ -122,7 +122,7 @@ interrupt:
 	return
 	
 setupInterrupt:
-	setint and %11110001, %11110000
+	setint and %11110001, %11110001
 }
 
 
