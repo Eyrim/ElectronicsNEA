@@ -20,9 +20,16 @@ initInterrupt:
 	return
 	
 main:
+	bcf STATUS, RP0 ; Move to bank 0
+	btfss TRISB, 0 ; If port B0
 	call bassPulse
-	call wait1000ms
-
+	btfss TRISB, 1 ; If port B1
+	call snarePulse
+	btfss TRISB, 2 ; If port B2
+	call floorTomPulse
+	btfss TRISB, 3 ; If port B3
+	call highTomPulse
+	goto main
 end
 
 bassPulse: ; Pulses the bass drum 4 times
