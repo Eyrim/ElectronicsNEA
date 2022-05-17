@@ -21,13 +21,13 @@ initInterrupt:
 	
 main:
 	bcf STATUS, RP0 ; Move to bank 0
-	btfss TRISB, 0 ; If port B0
+	btfsc TRISB, 0 ; If port B0
 	call bassPulse
-	btfss TRISB, 1 ; If port B1
+	btfsc TRISB, 1 ; If port B1
 	call snarePulse
-	btfss TRISB, 2 ; If port B2
+	btfsc TRISB, 2 ; If port B2
 	call floorTomPulse
-	btfss TRISB, 3 ; If port B3
+	btfsc TRISB, 3 ; If port B3
 	call highTomPulse
 	goto main
 end
