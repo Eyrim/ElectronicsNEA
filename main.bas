@@ -3,12 +3,18 @@
 init:
 	bsf STATUS, RP0 ; Moves to bank 1
 	call initPortsB ; Initialise Port B
+	call initPortsA ; Initialise Port A
 	call initInterrupt ; Setup the interrupts
 	call main ; "Entry Point"
 	
 initPortsB:
 	movlw b'00001111' ; Sets B0-B3 to Input ; Sets B4-B7 as output
 	movwf TRISB 
+	return
+	
+initPortsA:
+	movlw b'00000001' ; A.7 and A.0 are inputs (A.7 is interrupt)
+	movwf TRISA
 	bcf STATUS, RP0
 	return
 	
@@ -21,6 +27,9 @@ initInterrupt:
 	
 main:
 	bcf STATUS, RP0 ; Move to bank 0
+	; Test A.0
+	btfsc PORTA, 0
+	goto serialFlash
 	btfsc TRISB, 0 ; If port B0
 	call bassPulse
 	btfsc TRISB, 1 ; If port B1
@@ -31,6 +40,37 @@ main:
 	call highTomPulse
 	goto main
 end
+
+; Flash the LEDs
+	;TODO: Refactor
+	serialFlash: 
+			movlw b'00000000'
+			movwf COUNTER
+			
+			serialFlashLoop: 
+				bsf PORTB, 4
+				call wait10ms
+				bsf PORTB, 5
+				call wait10ms
+				bcf PORTB, 4
+				call wait10ms
+				bsf PORTB, 6
+				call wait10ms
+				bcf PORTB, 5
+				call wait10ms
+				bsf PORTB, 7
+				call wait10ms
+				bcf PORTB, 6
+				call wait10ms
+				bcf PORTB, 7
+				call wait10ms
+				
+				incf COUNTER, 1 ; increment the file register to itself
+				btfss COUNTER, 5 ; If the loop has iterated 16 times ; CHANGE THIS TO BE 16 BEFORE HAND IN
+				goto serialFlashLoop
+				return
+				 
+		return ; Return
 
 bassPulse: ; Pulses the bass drum 4 times
 	BASS_COUNTER equ b19
@@ -96,49 +136,10 @@ interrupt: ; A.7 = external interrupt
 	; Handle the interrupt
 	bsf STATUS, RP0 ; Move to bank 0
 	
-	; Test A.0
-	btfss PORTA, 0
-	goto serialFlash
 	goto allFlash
 	
 end
-	
-	
-	
-	; Flash the LEDs
-	;TODO: Refactor
-	serialFlash: 
-			movlw b'00000000'
-			movwf COUNTER
-			
-			serialFlashLoop: 
-				bsf PORTB, 4
-				call wait10ms
-				bsf PORTB, 5
-				call wait10ms
-				bcf PORTB, 4
-				call wait10ms
-				bsf PORTB, 6
-				call wait10ms
-				bcf PORTB, 5
-				call wait10ms
-				bsf PORTB, 7
-				call wait10ms
-				bcf PORTB, 6
-				call wait10ms
-				bcf PORTB, 7
-				call wait10ms
-				
-				incf COUNTER, 1 ; increment the file register to itself
-				btfss COUNTER, 5 ; If the loop has iterated 16 times ; CHANGE THIS TO BE 16 BEFORE HAND IN
-				goto serialFlashLoop
-				return
-				 
-		; Ran at the end to reset the interrupt 
-		movf W_SAVE, W ; Move the saved values back into the working register
-		retfie ; Return and enable Global Interrupt Register
 		
-	
 	; Flashes all LEDS at once
 	allFlash:
 		movlw b'00000000'
@@ -150,6 +151,14 @@ end
 			bsf PORTB, 5
 			bsf PORTB, 6
 			bsf PORTB, 7
+			
+			call wait10ms
+			
+			; Clear all output bits
+			bcf PORTB, 4
+			bcf PORTB, 5
+			bcf PORTB, 6
+			bcf PORTB, 7
 			call wait10ms
 			
 			incf COUNTER, 1 ; increment file register to itself
