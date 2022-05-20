@@ -13,7 +13,7 @@ initPortsB:
 	return
 	
 initPortsA:
-	movlw b'00000001' ; A.7 and A.0 are inputs (A.7 is interrupt)
+	movlw b'01000001' ; A.7 and A.0 are inputs (A.7 is interrupt)
 	movwf TRISA
 	bcf STATUS, RP0
 	return
@@ -30,13 +30,13 @@ main:
 	; Test A.0
 	btfsc PORTA, 0
 	goto serialFlash
-	btfsc TRISB, 0 ; If port B0
+	btfsc PORTB, 0 ; If port B0
 	call bassPulse
-	btfsc TRISB, 1 ; If port B1
+	btfsc PORTB, 1 ; If port B1
 	call snarePulse
-	btfsc TRISB, 2 ; If port B2
+	btfsc PORTB, 2 ; If port B2
 	call floorTomPulse
-	btfsc TRISB, 3 ; If port B3
+	btfsc PORTB, 3 ; If port B3
 	call highTomPulse
 	goto main
 end
@@ -66,7 +66,7 @@ end
 				call wait10ms
 				
 				incf COUNTER, 1 ; increment the file register to itself
-				btfss COUNTER, 5 ; If the loop has iterated 16 times ; CHANGE THIS TO BE 16 BEFORE HAND IN
+				btfss COUNTER, 5 ; If the loop has iterated 16 times 
 				goto serialFlashLoop
 				return
 				 
@@ -162,7 +162,7 @@ end
 			call wait10ms
 			
 			incf COUNTER, 1 ; increment file register to itself
-			btfss COUNTER, 4 ; If the loop has iterated 8 times ; CHANGE THIS TO BE 8 BEFORE HAND IN
+			btfss COUNTER, 4 ; If the loop has iterated 8 times
 			goto allFlashLoop
 			return
 			
